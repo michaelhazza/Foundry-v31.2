@@ -1,0 +1,159 @@
+{
+  "version": "1.0",
+  "generatedBy": "Agent 2",
+  "generatedAt": "2026-01-28T10:30:00Z",
+  "decisions": {
+    "authentication": {
+      "selectedOption": "JWT with 7-day expiration, no refresh tokens",
+      "alternatives": [
+        "Session-based auth with Redis",
+        "OAuth 2.0 only",
+        "JWT with refresh tokens"
+      ],
+      "rationale": "Stateless authentication scales horizontally without session storage. 7-day expiration balances security and UX for MVP. Refresh tokens deferred to Phase 2.",
+      "adrId": "ADR-002",
+      "implementation": {
+        "library": "jsonwebtoken",
+        "algorithm": "HS256",
+        "expiry": "7d",
+        "secretEnvVar": "JWT_SECRET",
+        "tokenStorage": "localStorage",
+        "headerFormat": "Bearer <token>"
+      }
+    },
+    "multiTenant": {
+      "selectedOption": "Query-level filtering with organizationId foreign key",
+      "alternatives": [
+        "Separate databases per tenant",
+        "Row-Level Security (RLS) in PostgreSQL",
+        "Schema-based isolation"
+      ],
+      "rationale": "Query-level filtering is simple, standard pattern with minimal overhead. Separate databases violate Replit constraints. RLS adds ORM complexity.",
+      "adrId": "ADR-003",
+      "implementation": {
+        "enforcementStrategy": "middleware",
+        "middlewareName": "requireOrganization",
+        "filterColumn": "organization_id",
+        "queryHelperPattern": "where: eq(table.organizationId, req.user.organizationId)"
+      }
+    },
+    "softDelete": {
+      "selectedOption": "Global soft delete with deleted_at column and 30-day retention",
+      "alternatives": [
+        "Hard delete only",
+        "Per-entity soft delete",
+        "Audit log instead of soft delete"
+      ],
+      "rationale": "Global soft delete provides undo capability and audit trail. 30-day retention balances storage and recovery window.",
+      "adrId": "ADR-005",
+      "implementation": {
+        "column": "deleted_at",
+        "type": "TIMESTAMP",
+        "defaultValue": "NULL",
+        "retentionDays": 30,
+        "cleanupSchedule": "0 2 * * *",
+        "queryHelperName": "findActive",
+        "filterPattern": "isNull(table.deletedAt)"
+      }
+    },
+    "fileUpload": {
+      "selectedOption": "Local filesystem with stream processing",
+      "alternatives": [
+        "S3/Cloudflare R2 storage",
+        "Base64 in database",
+        "External upload service (Uploadcare)"
+      ],
+      "rationale": "Local filesystem simplest for MVP. Stream processing prevents memory issues. Ephemeral FS acceptable for cache (files reparsable).",
+      "adrId": "ADR-006",
+      "implementation": {
+        "library": "multer",
+        "storageLocation": "/tmp/uploads",
+        "limits": {
+          "maxFileSize": "100MB",
+          "maxFiles": 10,
+          "csvMaxSize": "100MB",
+          "excelMaxSize": "100MB",
+          "imageMaxSize": "10MB"
+        },
+        "allowedMimeTypes": [
+          "text/csv",
+          "application/vnd.ms-excel",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "image/png",
+          "image/jpeg"
+        ],
+        "processingMode": "stream",
+        "retentionDays": 30,
+        "cleanupSchedule": "0 3 * * *"
+      }
+    },
+    "errorHandling": {
+      "selectedOption": "Structured error codes with standard HTTP mapping",
+      "alternatives": [
+        "Generic messages only",
+        "Exception-based errors",
+        "Error classes hierarchy"
+      ],
+      "rationale": "Structured codes enable client-side error handling and logging. HTTP mapping provides standard semantics.",
+      "adrId": "ADR-007",
+      "implementation": {
+        "codeFormat": "CATEGORY-NNN",
+        "categories": [
+          "AUTH",
+          "VAL",
+          "DB",
+          "API",
+          "SYS",
+          "FILE"
+        ],
+        "httpMapping": {
+          "AUTH-001": 401,
+          "AUTH-002": 401,
+          "AUTH-003": 401,
+          "AUTH-004": 403,
+          "VAL-001": 400,
+          "DB-001": 500,
+          "DB-002": 409,
+          "DB-003": 404,
+          "API-001": 502,
+          "SYS-001": 500,
+          "FILE-001": 400
+        },
+        "responseHelper": "sendError",
+        "globalHandler": "app.use((err, req, res, next) => {...})"
+      }
+    },
+    "logging": {
+      "selectedOption": "Winston with JSON structured logging to console",
+      "alternatives": [
+        "console.log only",
+        "Pino logger",
+        "External service (Datadog)"
+      ],
+      "rationale": "Winston provides structured JSON logs with levels and transports. JSON format enables parsing for debugging.",
+      "adrId": "ADR-008",
+      "implementation": {
+        "library": "winston",
+        "format": "json",
+        "levels": [
+          "error",
+          "warn",
+          "info",
+          "debug"
+        ],
+        "transport": "console (stdout)",
+        "contextFields": [
+          "userId",
+          "organizationId",
+          "requestId",
+          "timestamp"
+        ],
+        "sensitiveFieldsExcluded": [
+          "password",
+          "token",
+          "apiKey"
+        ]
+      }
+    }
+  }
+}

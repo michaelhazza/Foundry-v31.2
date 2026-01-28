@@ -1,0 +1,260 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-01-28T00:00:00Z",
+  "folderStructurePolicy": "FLEXIBLE",
+  "totalPages": 18,
+  "pages": [
+    {
+      "id": "login-page",
+      "name": "LoginPage",
+      "filePath": "client/src/pages/auth/LoginPage.tsx",
+      "routePath": "/login",
+      "authenticated": false,
+      "purpose": "User authentication with email/password",
+      "apiDependencies": [
+        { "method": "POST", "endpoint": "/api/auth/login", "required": true }
+      ],
+      "dataDependencies": ["User"],
+      "componentDependencies": ["Card", "Form", "Input", "Button", "Alert"]
+    },
+    {
+      "id": "register-page",
+      "name": "RegisterPage",
+      "filePath": "client/src/pages/auth/RegisterPage.tsx",
+      "routePath": "/register",
+      "authenticated": false,
+      "purpose": "New user account creation",
+      "apiDependencies": [
+        { "method": "POST", "endpoint": "/api/auth/register", "required": true }
+      ],
+      "dataDependencies": ["User", "Organization"],
+      "componentDependencies": ["Card", "Form", "Input", "Button", "Alert"]
+    },
+    {
+      "id": "forgot-password-page",
+      "name": "ForgotPasswordPage",
+      "filePath": "client/src/pages/auth/ForgotPasswordPage.tsx",
+      "routePath": "/forgot-password",
+      "authenticated": false,
+      "purpose": "Password reset request via email",
+      "apiDependencies": [
+        { "method": "POST", "endpoint": "/api/auth/forgot-password", "required": true }
+      ],
+      "dataDependencies": [],
+      "componentDependencies": ["Card", "Form", "Input", "Button", "Alert"]
+    },
+    {
+      "id": "reset-password-page",
+      "name": "ResetPasswordPage",
+      "filePath": "client/src/pages/auth/ResetPasswordPage.tsx",
+      "routePath": "/reset-password",
+      "authenticated": false,
+      "purpose": "Password reset confirmation with token",
+      "apiDependencies": [
+        { "method": "POST", "endpoint": "/api/auth/reset-password", "required": true }
+      ],
+      "dataDependencies": [],
+      "componentDependencies": ["Card", "Form", "Input", "Button", "Alert"]
+    },
+    {
+      "id": "dashboard-page",
+      "name": "DashboardPage",
+      "filePath": "client/src/pages/DashboardPage.tsx",
+      "routePath": "/",
+      "authenticated": true,
+      "purpose": "Landing page showing projects overview and recent activity",
+      "apiDependencies": [
+        { "method": "GET", "endpoint": "/api/projects", "required": true },
+        { "method": "GET", "endpoint": "/api/processing", "required": false },
+        { "method": "GET", "endpoint": "/api/datasets", "required": false }
+      ],
+      "dataDependencies": ["Project", "ProcessingRun", "Dataset"],
+      "componentDependencies": ["Card", "ProjectCard", "Table", "Button"]
+    },
+    {
+      "id": "projects-list-page",
+      "name": "ProjectsListPage",
+      "filePath": "client/src/pages/projects/ProjectsListPage.tsx",
+      "routePath": "/projects",
+      "authenticated": true,
+      "purpose": "List all projects with search/filter",
+      "apiDependencies": [
+        { "method": "GET", "endpoint": "/api/projects", "required": true }
+      ],
+      "dataDependencies": ["Project"],
+      "componentDependencies": ["Input", "Button", "ProjectCard", "EmptyState"]
+    },
+    {
+      "id": "project-detail-page",
+      "name": "ProjectDetailPage",
+      "filePath": "client/src/pages/projects/ProjectDetailPage.tsx",
+      "routePath": "/projects/:projectId",
+      "authenticated": true,
+      "purpose": "Project detail showing sources, runs, datasets",
+      "apiDependencies": [
+        { "method": "GET", "endpoint": "/api/projects/:projectId", "required": true },
+        { "method": "PATCH", "endpoint": "/api/projects/:projectId", "required": true },
+        { "method": "DELETE", "endpoint": "/api/projects/:projectId", "required": true },
+        { "method": "GET", "endpoint": "/api/projects/:projectId/sources", "required": true },
+        { "method": "GET", "endpoint": "/api/projects/:projectId/processing", "required": false }
+      ],
+      "dataDependencies": ["Project", "Source", "ProcessingRun", "Dataset"],
+      "componentDependencies": ["Card", "Tabs", "Table", "Button", "Dialog"]
+    },
+    {
+      "id": "project-create-page",
+      "name": "ProjectCreatePage",
+      "filePath": "client/src/pages/projects/ProjectCreatePage.tsx",
+      "routePath": "/projects/new",
+      "authenticated": true,
+      "purpose": "Create new project with name/description",
+      "apiDependencies": [
+        { "method": "POST", "endpoint": "/api/projects", "required": true }
+      ],
+      "dataDependencies": ["Project"],
+      "componentDependencies": ["Card", "Form", "Input", "Textarea", "Button"]
+    },
+    {
+      "id": "source-upload-page",
+      "name": "SourceUploadPage",
+      "filePath": "client/src/pages/sources/SourceUploadPage.tsx",
+      "routePath": "/projects/:projectId/sources/upload",
+      "authenticated": true,
+      "purpose": "Upload new data source (CSV, Excel, images)",
+      "apiDependencies": [
+        { "method": "POST", "endpoint": "/api/upload", "required": true },
+        { "method": "POST", "endpoint": "/api/projects/:projectId/sources", "required": true }
+      ],
+      "dataDependencies": ["Source"],
+      "componentDependencies": ["Card", "FileUploader", "Form", "Input", "Textarea", "Button"]
+    },
+    {
+      "id": "source-detail-page",
+      "name": "SourceDetailPage",
+      "filePath": "client/src/pages/sources/SourceDetailPage.tsx",
+      "routePath": "/sources/:sourceId",
+      "authenticated": true,
+      "purpose": "View/edit source metadata, preview data",
+      "apiDependencies": [
+        { "method": "GET", "endpoint": "/api/sources/:sourceId", "required": true },
+        { "method": "PATCH", "endpoint": "/api/sources/:sourceId", "required": true },
+        { "method": "DELETE", "endpoint": "/api/sources/:sourceId", "required": true }
+      ],
+      "dataDependencies": ["Source", "ProcessingRun"],
+      "componentDependencies": ["Card", "Tabs", "Table", "Button", "Dialog"]
+    },
+    {
+      "id": "processing-runs-list-page",
+      "name": "ProcessingRunsListPage",
+      "filePath": "client/src/pages/processing/ProcessingRunsListPage.tsx",
+      "routePath": "/projects/:projectId/processing",
+      "authenticated": true,
+      "purpose": "List all processing runs for project",
+      "apiDependencies": [
+        { "method": "GET", "endpoint": "/api/projects/:projectId/processing", "required": true }
+      ],
+      "dataDependencies": ["ProcessingRun"],
+      "componentDependencies": ["Table", "StatusBadge", "Button"]
+    },
+    {
+      "id": "processing-run-detail-page",
+      "name": "ProcessingRunDetailPage",
+      "filePath": "client/src/pages/processing/ProcessingRunDetailPage.tsx",
+      "routePath": "/processing/:runId",
+      "authenticated": true,
+      "purpose": "View processing run details, logs, results",
+      "apiDependencies": [
+        { "method": "GET", "endpoint": "/api/processing/:runId", "required": true },
+        { "method": "PATCH", "endpoint": "/api/processing/:runId", "required": true }
+      ],
+      "dataDependencies": ["ProcessingRun", "Dataset"],
+      "componentDependencies": ["Card", "Tabs", "Progress", "StatusBadge", "Button"]
+    },
+    {
+      "id": "datasets-list-page",
+      "name": "DatasetsListPage",
+      "filePath": "client/src/pages/datasets/DatasetsListPage.tsx",
+      "routePath": "/datasets",
+      "authenticated": true,
+      "purpose": "List all output datasets with download",
+      "apiDependencies": [
+        { "method": "GET", "endpoint": "/api/datasets", "required": true }
+      ],
+      "dataDependencies": ["Dataset"],
+      "componentDependencies": ["Table", "Button"]
+    },
+    {
+      "id": "dataset-detail-page",
+      "name": "DatasetDetailPage",
+      "filePath": "client/src/pages/datasets/DatasetDetailPage.tsx",
+      "routePath": "/datasets/:datasetId",
+      "authenticated": true,
+      "purpose": "View dataset details, preview data, download",
+      "apiDependencies": [
+        { "method": "GET", "endpoint": "/api/datasets/:datasetId", "required": true },
+        { "method": "DELETE", "endpoint": "/api/datasets/:datasetId", "required": true }
+      ],
+      "dataDependencies": ["Dataset"],
+      "componentDependencies": ["Card", "Tabs", "Table", "Button"]
+    },
+    {
+      "id": "integrations-list-page",
+      "name": "IntegrationsListPage",
+      "filePath": "client/src/pages/integrations/IntegrationsListPage.tsx",
+      "routePath": "/integrations",
+      "authenticated": true,
+      "purpose": "List external integrations (Teamwork Desk)",
+      "apiDependencies": [
+        { "method": "GET", "endpoint": "/api/integrations", "required": true },
+        { "method": "POST", "endpoint": "/api/integrations", "required": true }
+      ],
+      "dataDependencies": ["Integration"],
+      "componentDependencies": ["Card", "Button", "EmptyState"]
+    },
+    {
+      "id": "integration-detail-page",
+      "name": "IntegrationDetailPage",
+      "filePath": "client/src/pages/integrations/IntegrationDetailPage.tsx",
+      "routePath": "/integrations/:integrationId",
+      "authenticated": true,
+      "purpose": "Create/edit/test integration credentials",
+      "apiDependencies": [
+        { "method": "GET", "endpoint": "/api/integrations/:integrationId", "required": true },
+        { "method": "POST", "endpoint": "/api/integrations", "required": true },
+        { "method": "PATCH", "endpoint": "/api/integrations/:integrationId", "required": true },
+        { "method": "POST", "endpoint": "/api/integrations/:integrationId/test", "required": false },
+        { "method": "DELETE", "endpoint": "/api/integrations/:integrationId", "required": true }
+      ],
+      "dataDependencies": ["Integration"],
+      "componentDependencies": ["Card", "Form", "Input", "Button", "Alert"]
+    },
+    {
+      "id": "profile-settings-page",
+      "name": "ProfileSettingsPage",
+      "filePath": "client/src/pages/settings/ProfileSettingsPage.tsx",
+      "routePath": "/settings/profile",
+      "authenticated": true,
+      "purpose": "Edit user profile (name, email, password)",
+      "apiDependencies": [
+        { "method": "GET", "endpoint": "/api/auth/profile", "required": true },
+        { "method": "PATCH", "endpoint": "/api/auth/profile", "required": true }
+      ],
+      "dataDependencies": ["User"],
+      "componentDependencies": ["Card", "Form", "Input", "Button", "SettingsNav"]
+    },
+    {
+      "id": "organization-settings-page",
+      "name": "OrganizationSettingsPage",
+      "filePath": "client/src/pages/settings/OrganizationSettingsPage.tsx",
+      "routePath": "/settings/organization",
+      "authenticated": true,
+      "purpose": "Edit organization details (name, slug)",
+      "apiDependencies": [
+        { "method": "GET", "endpoint": "/api/organizations/current", "required": true },
+        { "method": "PATCH", "endpoint": "/api/organizations/:organizationId", "required": true }
+      ],
+      "dataDependencies": ["Organization"],
+      "componentDependencies": ["Card", "Form", "Input", "Button", "SettingsNav", "Alert"]
+    }
+  ]
+}
