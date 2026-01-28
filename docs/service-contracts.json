@@ -1,0 +1,577 @@
+{
+  "version": "1.0",
+  "generatedBy": "Agent 4",
+  "generatedAt": "2026-01-28T10:30:00Z",
+  "totalEndpoints": 51,
+  "contracts": {
+    "auth": {
+      "serviceFile": "server/services/auth.service.ts",
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/auth/register",
+          "function": "register",
+          "parameters": [
+            { "name": "email", "type": "string", "source": "body" },
+            { "name": "password", "type": "string", "source": "body" },
+            { "name": "name", "type": "string", "source": "body" },
+            { "name": "organizationName", "type": "string", "source": "body" }
+          ],
+          "returns": "Promise<{ user: UserProfile; organization: Organization; token: string }>",
+          "authenticated": false
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/login",
+          "function": "login",
+          "parameters": [
+            { "name": "email", "type": "string", "source": "body" },
+            { "name": "password", "type": "string", "source": "body" }
+          ],
+          "returns": "Promise<{ user: UserProfile; token: string }>",
+          "authenticated": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/auth/me",
+          "function": "getCurrentUser",
+          "parameters": [
+            { "name": "userId", "type": "number", "source": "req.user.id" }
+          ],
+          "returns": "Promise<{ id: number; email: string; name: string; role: string; organizationId: number; organization: Organization }>",
+          "authenticated": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/forgot-password",
+          "function": "forgotPassword",
+          "parameters": [
+            { "name": "email", "type": "string", "source": "body" }
+          ],
+          "returns": "Promise<void>",
+          "authenticated": false
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/reset-password",
+          "function": "resetPassword",
+          "parameters": [
+            { "name": "token", "type": "string", "source": "body" },
+            { "name": "newPassword", "type": "string", "source": "body" }
+          ],
+          "returns": "Promise<void>",
+          "authenticated": false
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/auth/change-password",
+          "function": "changePassword",
+          "parameters": [
+            { "name": "userId", "type": "number", "source": "req.user.id" },
+            { "name": "currentPassword", "type": "string", "source": "body" },
+            { "name": "newPassword", "type": "string", "source": "body" }
+          ],
+          "returns": "Promise<void>",
+          "authenticated": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/auth/verify-token",
+          "function": "verifyToken",
+          "parameters": [
+            { "name": "token", "type": "string", "source": "req.headers.authorization" }
+          ],
+          "returns": "Promise<{ valid: boolean; expiresAt: string }>",
+          "authenticated": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/auth/logout",
+          "function": null,
+          "parameters": [],
+          "returns": "void",
+          "authenticated": true,
+          "note": "Client-side token deletion only"
+        }
+      ]
+    },
+    "organizations": {
+      "serviceFile": "server/services/organizations.service.ts",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/organizations/:organizationId",
+          "function": "getOrganization",
+          "parameters": [
+            { "name": "organizationId", "type": "number", "source": "params" }
+          ],
+          "returns": "Promise<{ id: number; name: string; slug: string; createdAt: string; updatedAt: string }>",
+          "authenticated": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/organizations/:organizationId/users",
+          "function": "listUsers",
+          "parameters": [
+            { "name": "organizationId", "type": "number", "source": "params" },
+            { "name": "page", "type": "number", "source": "query", "default": 1 },
+            { "name": "limit", "type": "number", "source": "query", "default": 20 }
+          ],
+          "returns": "Promise<{ users: Array<User>; pagination: PaginationMeta }>",
+          "authenticated": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/organizations/:organizationId/users",
+          "function": "addUser",
+          "parameters": [
+            { "name": "organizationId", "type": "number", "source": "params" },
+            { "name": "email", "type": "string", "source": "body" },
+            { "name": "name", "type": "string", "source": "body" },
+            { "name": "role", "type": "string", "source": "body" }
+          ],
+          "returns": "Promise<User>",
+          "authenticated": true,
+          "requiredRole": "owner"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/organizations/:organizationId",
+          "function": "updateOrganization",
+          "parameters": [
+            { "name": "organizationId", "type": "number", "source": "params" },
+            { "name": "name", "type": "string", "source": "body", "optional": true }
+          ],
+          "returns": "Promise<Organization>",
+          "authenticated": true,
+          "requiredRole": "owner"
+        }
+      ]
+    },
+    "projects": {
+      "serviceFile": "server/services/projects.service.ts",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/projects",
+          "function": "listProjects",
+          "parameters": [
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" },
+            { "name": "page", "type": "number", "source": "query", "default": 1 },
+            { "name": "limit", "type": "number", "source": "query", "default": 20 },
+            { "name": "search", "type": "string", "source": "query", "optional": true }
+          ],
+          "returns": "Promise<{ projects: Array<Project>; pagination: PaginationMeta }>",
+          "authenticated": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/projects/:projectId",
+          "function": "getProject",
+          "parameters": [
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" }
+          ],
+          "returns": "Promise<ProjectDetail>",
+          "authenticated": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/projects/:projectId/stats",
+          "function": "getProjectStats",
+          "parameters": [
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" }
+          ],
+          "returns": "Promise<ProjectStats>",
+          "authenticated": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/projects",
+          "function": "createProject",
+          "parameters": [
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" },
+            { "name": "ownerId", "type": "number", "source": "req.user.id" },
+            { "name": "name", "type": "string", "source": "body" },
+            { "name": "description", "type": "string", "source": "body", "optional": true }
+          ],
+          "returns": "Promise<Project>",
+          "authenticated": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/projects/:projectId",
+          "function": "updateProject",
+          "parameters": [
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" },
+            { "name": "name", "type": "string", "source": "body", "optional": true },
+            { "name": "description", "type": "string", "source": "body", "optional": true }
+          ],
+          "returns": "Promise<Project>",
+          "authenticated": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/projects/:projectId",
+          "function": "deleteProject",
+          "parameters": [
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" }
+          ],
+          "returns": "Promise<void>",
+          "authenticated": true
+        }
+      ]
+    },
+    "sources": {
+      "serviceFile": "server/services/sources.service.ts",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/projects/:projectId/sources",
+          "function": "listSources",
+          "parameters": [
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" },
+            { "name": "page", "type": "number", "source": "query", "default": 1 },
+            { "name": "limit", "type": "number", "source": "query", "default": 20 },
+            { "name": "type", "type": "string", "source": "query", "optional": true },
+            { "name": "status", "type": "string", "source": "query", "optional": true }
+          ],
+          "returns": "Promise<{ sources: Array<Source>; pagination: PaginationMeta }>",
+          "authenticated": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/projects/:projectId/sources/:sourceId",
+          "function": "getSource",
+          "parameters": [
+            { "name": "sourceId", "type": "number", "source": "params" },
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" }
+          ],
+          "returns": "Promise<SourceDetail>",
+          "authenticated": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/projects/:projectId/sources/:sourceId/download",
+          "function": "getSourceFile",
+          "parameters": [
+            { "name": "sourceId", "type": "number", "source": "params" },
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" }
+          ],
+          "returns": "Promise<{ filepath: string; filename: string; mimetype: string }>",
+          "authenticated": true,
+          "responseType": "file-stream"
+        },
+        {
+          "method": "POST",
+          "path": "/api/projects/:projectId/sources",
+          "function": "createSource",
+          "parameters": [
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" },
+            { "name": "type", "type": "string", "source": "multer-file" },
+            { "name": "filename", "type": "string", "source": "multer-file" },
+            { "name": "filepath", "type": "string", "source": "multer-file" },
+            { "name": "mimetype", "type": "string", "source": "multer-file" },
+            { "name": "size", "type": "number", "source": "multer-file" }
+          ],
+          "returns": "Promise<Source>",
+          "authenticated": true,
+          "contentType": "multipart/form-data"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/projects/:projectId/sources/:sourceId",
+          "function": "updateSource",
+          "parameters": [
+            { "name": "sourceId", "type": "number", "source": "params" },
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" },
+            { "name": "filename", "type": "string", "source": "body", "optional": true }
+          ],
+          "returns": "Promise<Source>",
+          "authenticated": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/projects/:projectId/sources/:sourceId",
+          "function": "deleteSource",
+          "parameters": [
+            { "name": "sourceId", "type": "number", "source": "params" },
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" }
+          ],
+          "returns": "Promise<void>",
+          "authenticated": true
+        }
+      ]
+    },
+    "processing": {
+      "serviceFile": "server/services/processing.service.ts",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/projects/:projectId/processing-runs",
+          "function": "listProcessingRuns",
+          "parameters": [
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" },
+            { "name": "page", "type": "number", "source": "query", "default": 1 },
+            { "name": "limit", "type": "number", "source": "query", "default": 20 },
+            { "name": "status", "type": "string", "source": "query", "optional": true },
+            { "name": "sourceId", "type": "number", "source": "query", "optional": true }
+          ],
+          "returns": "Promise<{ runs: Array<ProcessingRun>; pagination: PaginationMeta }>",
+          "authenticated": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/projects/:projectId/processing-runs/:runId",
+          "function": "getProcessingRun",
+          "parameters": [
+            { "name": "runId", "type": "number", "source": "params" },
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" }
+          ],
+          "returns": "Promise<ProcessingRunDetail>",
+          "authenticated": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/projects/:projectId/processing-runs/:runId/logs",
+          "function": "getProcessingLogs",
+          "parameters": [
+            { "name": "runId", "type": "number", "source": "params" },
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" }
+          ],
+          "returns": "Promise<{ runId: number; logs: Array<LogEntry> }>",
+          "authenticated": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/projects/:projectId/processing-runs",
+          "function": "createProcessingRun",
+          "parameters": [
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" },
+            { "name": "sourceId", "type": "number", "source": "body" },
+            { "name": "config", "type": "object", "source": "body" }
+          ],
+          "returns": "Promise<ProcessingRun>",
+          "authenticated": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/projects/:projectId/processing-runs/:runId",
+          "function": "updateProcessingRun",
+          "parameters": [
+            { "name": "runId", "type": "number", "source": "params" },
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" },
+            { "name": "config", "type": "object", "source": "body" }
+          ],
+          "returns": "Promise<ProcessingRun>",
+          "authenticated": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/projects/:projectId/processing-runs/:runId",
+          "function": "deleteProcessingRun",
+          "parameters": [
+            { "name": "runId", "type": "number", "source": "params" },
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" }
+          ],
+          "returns": "Promise<void>",
+          "authenticated": true
+        }
+      ]
+    },
+    "datasets": {
+      "serviceFile": "server/services/datasets.service.ts",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/projects/:projectId/datasets",
+          "function": "listDatasets",
+          "parameters": [
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" },
+            { "name": "page", "type": "number", "source": "query", "default": 1 },
+            { "name": "limit", "type": "number", "source": "query", "default": 20 },
+            { "name": "format", "type": "string", "source": "query", "optional": true }
+          ],
+          "returns": "Promise<{ datasets: Array<Dataset>; pagination: PaginationMeta }>",
+          "authenticated": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/projects/:projectId/datasets/:datasetId",
+          "function": "getDataset",
+          "parameters": [
+            { "name": "datasetId", "type": "number", "source": "params" },
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" }
+          ],
+          "returns": "Promise<DatasetDetail>",
+          "authenticated": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/projects/:projectId/datasets/:datasetId/download",
+          "function": "getDatasetFile",
+          "parameters": [
+            { "name": "datasetId", "type": "number", "source": "params" },
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" }
+          ],
+          "returns": "Promise<{ fileUrl: string; filename: string; format: string }>",
+          "authenticated": true,
+          "responseType": "file-stream"
+        },
+        {
+          "method": "POST",
+          "path": "/api/projects/:projectId/datasets",
+          "function": "createDataset",
+          "parameters": [
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" },
+            { "name": "name", "type": "string", "source": "body" },
+            { "name": "format", "type": "string", "source": "body" },
+            { "name": "rowCount", "type": "number", "source": "body" },
+            { "name": "fileUrl", "type": "string", "source": "body" },
+            { "name": "metadata", "type": "object", "source": "body", "optional": true }
+          ],
+          "returns": "Promise<Dataset>",
+          "authenticated": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/projects/:projectId/datasets/:datasetId",
+          "function": "updateDataset",
+          "parameters": [
+            { "name": "datasetId", "type": "number", "source": "params" },
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" },
+            { "name": "name", "type": "string", "source": "body", "optional": true }
+          ],
+          "returns": "Promise<Dataset>",
+          "authenticated": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/projects/:projectId/datasets/:datasetId",
+          "function": "deleteDataset",
+          "parameters": [
+            { "name": "datasetId", "type": "number", "source": "params" },
+            { "name": "projectId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "req.user.organizationId" }
+          ],
+          "returns": "Promise<void>",
+          "authenticated": true
+        }
+      ]
+    },
+    "integrations": {
+      "serviceFile": "server/services/integrations.service.ts",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/organizations/:organizationId/integrations",
+          "function": "listIntegrations",
+          "parameters": [
+            { "name": "organizationId", "type": "number", "source": "params" },
+            { "name": "page", "type": "number", "source": "query", "default": 1 },
+            { "name": "limit", "type": "number", "source": "query", "default": 20 },
+            { "name": "type", "type": "string", "source": "query", "optional": true }
+          ],
+          "returns": "Promise<{ integrations: Array<Integration>; pagination: PaginationMeta }>",
+          "authenticated": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/organizations/:organizationId/integrations/:integrationId",
+          "function": "getIntegration",
+          "parameters": [
+            { "name": "integrationId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "params" }
+          ],
+          "returns": "Promise<Integration>",
+          "authenticated": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/organizations/:organizationId/integrations/:integrationId/test",
+          "function": "testIntegration",
+          "parameters": [
+            { "name": "integrationId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "params" }
+          ],
+          "returns": "Promise<{ status: string; message: string; details: any }>",
+          "authenticated": true,
+          "requiredRole": "owner"
+        },
+        {
+          "method": "POST",
+          "path": "/api/organizations/:organizationId/integrations",
+          "function": "createIntegration",
+          "parameters": [
+            { "name": "organizationId", "type": "number", "source": "params" },
+            { "name": "type", "type": "string", "source": "body" },
+            { "name": "name", "type": "string", "source": "body" },
+            { "name": "credentials", "type": "object", "source": "body" }
+          ],
+          "returns": "Promise<Integration>",
+          "authenticated": true,
+          "requiredRole": "owner"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/organizations/:organizationId/integrations/:integrationId",
+          "function": "updateIntegration",
+          "parameters": [
+            { "name": "integrationId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "params" },
+            { "name": "name", "type": "string", "source": "body", "optional": true },
+            { "name": "credentials", "type": "object", "source": "body", "optional": true }
+          ],
+          "returns": "Promise<Integration>",
+          "authenticated": true,
+          "requiredRole": "owner"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/organizations/:organizationId/integrations/:integrationId",
+          "function": "deleteIntegration",
+          "parameters": [
+            { "name": "integrationId", "type": "number", "source": "params" },
+            { "name": "organizationId", "type": "number", "source": "params" }
+          ],
+          "returns": "Promise<void>",
+          "authenticated": true,
+          "requiredRole": "owner"
+        }
+      ]
+    }
+  },
+  "validation": {
+    "totalEndpointsInContracts": 51,
+    "endpointsByResource": {
+      "auth": 8,
+      "organizations": 4,
+      "projects": 6,
+      "sources": 6,
+      "processing": 6,
+      "datasets": 6,
+      "integrations": 6
+    },
+    "verificationScript": "/scripts/verify-service-contract.sh"
+  }
+}
